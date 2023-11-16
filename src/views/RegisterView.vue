@@ -1,9 +1,40 @@
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const email = ref('');
 const password = ref('');
 const conf_password = ref('');
+
+const Register = async () => {
+    if (!email.value || !password.value || !conf_password.value) {
+        return alert('Please fill in all fields')
+    }
+
+    if (password.value !== conf_password.value) {
+        return alert('Password do not match')
+    }
+
+    const res = await fetch('http://localhost:3333/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: email.value,
+            password: password.value
+        })
+    }).then(res => res.json())
+
+    if (res.success) {
+        localStorage.setItem('token', res.token)
+        router.push('/')
+    } else {
+        alert(res.message)
+    }
+}
 </script>
 
 <template>
@@ -14,7 +45,7 @@ const conf_password = ref('');
             <p>Login or create an account to start using the super secret app</p>
         </header>
 
-        <form @submit.prevent="">
+        <form @submit.prevent="Register">
             <label>
                 <span>Enter your email</span>
                 <input type="email" v-model="email" placeholder="test@test.com" />
@@ -26,7 +57,7 @@ const conf_password = ref('');
             </label>
             <label>
                 <span>Confirm your password</span>
-                <input type="conf_password" v-model="password" placeholder="***********" />
+                <input type="conf_password" v-model="conf_password" placeholder="***********" />
             </label>
 
             <input type="submit" value="Register" />
