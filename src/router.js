@@ -4,7 +4,7 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        component: () => import('../views/HomeView.vue'),
+        component: () => import('./views/HomeView.vue'),
         meta: {
             requiresAuth: true,
         }
@@ -12,18 +12,32 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('../views/LoginView.vue')
+        component: () => import('./views/LoginView.vue')
     },
     {
         path: '/register',
         name: 'register',
-        component: () => import('../views/RegisterView.vue')
+        component: () => import('./views/RegisterView.vue')
     },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes
+})
+
+router.beforeEach(async (to, from, next) => {
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        //Authentication check
+        const token = localStorage.getItem('token')
+
+        if (token) {
+            // Check if token is valid
+            return next()
+        }
+        return next('/login')
+    }
+    next()
 })
 
 export default router;
